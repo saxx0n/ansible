@@ -1,0 +1,16 @@
+---
+profile: production
+
+exclude_paths:
+  - .cache
+  - .gitlab-ci.yml
+
+enable_list:
+  - args
+  - empty-string-compare 
+  - no-log-password 
+  - no-same-owner 
+
+skip_list:
+  - name[prefix]
+  - var-naming[no-role-prefix]

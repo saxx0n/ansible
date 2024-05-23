@@ -1,0 +1,50 @@
+---
+- name: User stuff with error
+  block:
+    - name: "Add user from hashi-vault ({{ user }})"
+      ansible.builtin.user:
+        name: "{{ user }}"
+        create_home: false
+        comment: "{{ lookup('hashi_vault', 'secret=kv-v1/users/{{ user }}:comment') }}"
+        uid: "{{ lookup('hashi_vault', 'secret=kv-v1/users/{{ user }}:uid') }}"
+        shell: "{{ lookup('hashi_vault', 'secret=kv-v1/users/{{ user }}:shell') }}"
+        password: "{{ lookup('hashi_vault', 'secret=kv-v1/users/{{ user }}:pass_hash') }}"
+        home: "{{ lookup('hashi_vault', 'secret=kv-v1/users/{{ user }}:home') }}"
+
+    - name: Make .ssh folder
+      ansible.builtin.file:
+        path: "{{ lookup('hashi_vault', 'secret=kv-v1/users/{{ user }}:home') }}/.ssh"
+        state: directory
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0700"
+
+    - name: "Add auth keys from hashi-vault for {{ user }}"
+      ansible.posix.authorized_key:
+        user: "{{ user }}"
+        state: present
+        key: "{{ lookup('hashi_vault', 'secret=kv-v1/users/{{ user }}:ssh_key') }}"
+
+    - name: "Get list of group from hash-vault for {{ user }}"
+      ansible.builtin.set_fact:
+        user_group: "{{ lookup('hashi_vault', 'secret=kv-v1/users/{{ user }}:groups') }}"
+
+    - name: Add user to group (if exists)
+      ansible.builtin.user:
+        name: "{{ user }}"
+        groups: "{{ line_item }}"
+        append: true
+      with_items:
+        - "{{ user_group.split(',') }}"
+      when:
+        - line_item in getent_group
+      loop_control:
+        loop_var: line_item
+  rescue:
+    - name: Inform user of error
+      ansible.builtin.debug:
+        msg: "Error caught with user '{{ user }}'"
+
+    - name: Disable purge root
+      ansible.builtin.set_fact:
+        purge_root_key: false

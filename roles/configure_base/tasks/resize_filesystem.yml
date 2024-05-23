@@ -1,0 +1,25 @@
+---
+- name: Gather partition data
+  ansible.builtin.setup:
+    filter:
+      - ansible_lvm
+
+- name: Resize Filesystem
+  community.general.lvol:
+    vg: "{{ item.vg | default('vg00') }}"
+    lv: "{{ item.lv }}"
+    size: "{{ item.size }}"
+    resizefs: true
+    shrink: false
+  with_items:
+    - lv: usr
+      size: 5G
+    - lv: var
+      size: 4G
+    - lv: opt/controller
+      size: 2G
+  when:
+    - ansible_lvm['lvs'][item.lv] is defined
+    - ansible_lvm['lvs'][item.lv]['size_g'] | float <= item.size | replace('G', '') | float
+  loop_control:
+    label: "{{ item.lv }}"

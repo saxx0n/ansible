@@ -1,0 +1,47 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name:
+      - sudo
+    state: present
+
+- name: Deploy basic sudo config
+  ansible.builtin.template:
+    src: sudo_user.j2
+    dest: /etc/sudoers.d/99-ansible-base
+    mode: "0440"
+    owner: root
+    group: root
+    validate: /usr/sbin/visudo -csf %s
+
+- name: Disable root password
+  ansible.builtin.user:
+    name: root
+    uid: 0
+    password: "*"
+    update_password: always
+
+- name: Remove Ubuntu user
+  ansible.builtin.user:
+    name: ubuntu
+    state: absent
+    remove: true
+
+- name: Get list of local user groups
+  ansible.builtin.getent:
+    database: group
+    split: ":"
+
+- name: Loop over configure_users
+  ansible.builtin.include_tasks: users_inner.yml
+  with_items:
+    - "{{ managed_users }}"
+  loop_control:
+    loop_var: user
+
+- name: Remove root ssh key
+  ansible.builtin.file:
+    path: /root/.ssh/authorized_keys
+    state: absent
+  when:
+    - purge_root_key | bool

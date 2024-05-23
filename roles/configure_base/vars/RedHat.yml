@@ -1,0 +1,4 @@
+---
+chrony_conf_location: /etc/chrony.conf
+pkg_update: /bin/yum, /usr/bin/dnf
+os_sudo: wheel

@@ -1,0 +1,19 @@
+---
+### Control variables
+# Disable IPv6 on nodes
+disable_ipv6: true
+
+# Enable the configure_firewall
+enable_firewall: true
+
+# Deploy DNS resolv config
+skip_dns: false
+
+### Task specific variables
+## DNS
+# DNS Servers
+dns1: <internal DNS1>
+dns2: <internal DNS2>
+
+# DNS Search
+search_domain: <internal domain>

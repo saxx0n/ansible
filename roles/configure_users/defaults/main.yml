@@ -1,0 +1,6 @@
+---
+# Users to be managed
+managed_users: [ansible-control, <additional users>]
+
+# Disable root key
+purge_root_key: true

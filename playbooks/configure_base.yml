@@ -1,0 +1,32 @@
+---
+- name: Find online nodes
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Check for online node
+      ansible.builtin.wait_for_connection:
+        sleep: 0
+        connect_timeout: 3
+        timeout: 15
+      register: online
+      ignore_errors: true
+
+    - name: Get list of reachable nodes
+      ansible.builtin.group_by:
+        key: reachable
+      when: online is success
+
+- name: Deploy Server Base
+  hosts: reachable
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Deploy Server Base
+      ansible.builtin.include_role:
+        name: configure_base
+
+    - name: Deploy Users
+      ansible.builtin.include_role:
+        name: configure_users

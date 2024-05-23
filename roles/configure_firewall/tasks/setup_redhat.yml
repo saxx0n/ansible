@@ -1,0 +1,18 @@
+---
+- name: Install configure_firewall
+  ansible.builtin.yum:
+    name:
+      - firewalld
+
+- name: Start configure_firewall
+  ansible.builtin.systemd:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Add SSH configure_firewall access
+  ansible.posix.firewalld:
+    service: ssh
+    permanent: true
+    immediate: true
+    state: enabled

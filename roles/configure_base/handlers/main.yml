@@ -1,0 +1,26 @@
+---
+- name: Restart Chrony
+  ansible.builtin.systemd:
+    name: chronyd
+    state: restarted
+
+- name: Reload NetworkManager
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: reloaded
+
+- name: Reload udev
+  ansible.builtin.command: udevadm control --reload-rules
+  register: udev_output
+  changed_when: udev_output.rc == 0
+
+- name: Update Grub
+  ansible.builtin.command: update-grub
+  register: grub_output
+  changed_when: "'Generating grub' in grub_output.stdout"
+  failed_when: grub_output.rc != 0
+  notify: Reboot OS
+
+- name: Reboot OS
+  ansible.builtin.reboot:
+    reboot_timeout: 3600

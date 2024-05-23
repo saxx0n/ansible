@@ -1,0 +1,3 @@
+---
+# Should IPv6 rules be skipped
+disable_ipv6: true

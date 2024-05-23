@@ -1,0 +1,51 @@
+---
+- name: Source variables based on OS
+  ansible.builtin.include_vars: "{{ var_file }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version | int }}.yml"
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}.yml"
+    - default.yml
+  loop_control:
+    loop_var: var_file
+
+- name: Configure configure_firewall
+  ansible.builtin.include_role:
+    name: configure_firewall
+  when:
+    - enable_firewall | bool
+
+- name: Deploy aliases
+  ansible.builtin.include_tasks: alias.yml
+  when:
+    - ansible_os_family == "Debian"
+
+- name: Disable IPv6
+  ansible.builtin.include_tasks: disable_ipv6.yml
+  when:
+    - disable_ipv6 | bool
+
+- name: Deploy virtual fixes
+  ansible.builtin.include_tasks: vm_fixes.yml
+  when:
+    - ansible_virtualization_type is defined
+
+- name: Resize filesystems
+  ansible.builtin.include_tasks: resize_filesystem.yml
+
+- name: Deploy cooling config
+  ansible.builtin.include_tasks: manage_rpi_fan.yml
+  when:
+    - ansible_architecture == 'aarch64'
+
+- name: DNS resolver config
+  ansible.builtin.include_tasks: manage_resolv.yml
+  when:
+    - not skip_dns | bool
+
+- name: Setup Chrony
+  ansible.builtin.include_tasks: manage_chrony.yml
+
+- name: Setup Postfix
+  ansible.builtin.include_role:
+    name: configure_postfix

@@ -1,0 +1,7 @@
+---
+- name: Deploy QEMU Agent to KVM nodes
+  ansible.builtin.package:
+    name:
+      - qemu-guest-agent
+  when:
+    - ansible_virtualization_type == 'kvm'

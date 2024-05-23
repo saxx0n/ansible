@@ -1,0 +1,5 @@
+{% if ansible_os_family == "RedHat" %}
+%wheel        ALL=(ALL)       NOPASSWD: /sbin/reboot, /bin/yum, /usr/bin/dnf
+{% elif ansible_os_family == "Debian" %}
+%sudo         ALL=(ALL)       NOPASSWD: /sbin/reboot, /usr/bin/apt-get, /usr/bin/apt
+{%  endif  %}

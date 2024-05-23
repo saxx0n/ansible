@@ -1,0 +1,6 @@
+search {{ search_domain }}
+
+nameserver {{ dns1 }}
+{% if dns2|length %}
+nameserver {{ dns2 }}
+{% endif %}

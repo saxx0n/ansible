@@ -1,0 +1,26 @@
+---
+- name: Install configure_firewall
+  ansible.builtin.apt:
+    name:
+      - ufw
+
+- name: Disable IPv6 rule creation
+  ansible.builtin.lineinfile:
+    path: /etc/default/ufw
+    regex: "IPV6=yes"
+    line: "IPV6=no"
+  when:
+    - disable_ipv6 | bool
+
+- name: Start configure_firewall
+  ansible.builtin.systemd:
+    name: ufw
+    state: started
+    enabled: true
+
+- name: Add SSH configure_firewall access
+  community.general.ufw:
+    port: ssh
+    proto: tcp
+    rule: allow
+    state: enabled

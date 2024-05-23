@@ -1,0 +1,7 @@
+- name: Deploy basic aliases
+  ansible.builtin.lineinfile:
+    path: /etc/bash.bashrc
+    line: "alias '{{ item.key }}'='{{ item.value }}'"
+  loop:
+    - key: ll
+      value: ls -al

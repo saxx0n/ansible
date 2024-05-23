@@ -1,0 +1,19 @@
+---
+- name: Deploy needed overlay for cooling
+  ansible.builtin.lineinfile:
+    path: /boot/firmware/usercfg.txt
+    regex: 'dtoverlay='
+    line: 'dtoverlay=rpi-poe'
+    owner: root
+    group: root
+    mode: "0755"
+    create: true
+
+- name: Deploy udev rule file
+  ansible.builtin.copy:
+    src: 50-rpi-fan.rules
+    dest: /etc/udev/rules.d/50-rpi-fan.rules
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload udev
