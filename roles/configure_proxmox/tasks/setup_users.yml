@@ -1,0 +1,40 @@
+---
+- name: Get current roles
+  ansible.builtin.command: pveum role list
+  changed_when: false
+  register: roles_out
+
+- name: Setup TerraformProv role
+  ansible.builtin.command: pveum role add TerraformProv -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt SDN.Use"  # noqa yaml[line-length]
+  changed_when: true
+  when: "'TerraformProv' not in roles_out.stdout"
+
+- name: Get current users
+  ansible.builtin.command: pveum user list
+  changed_when: false
+  register: users_out
+
+- name: Setup Terraform user
+  ansible.builtin.command: "pveum user add terraform-prov@pve -password {{ terraform_pw }}"
+  changed_when: true
+  when: "'terraform-prov' not in users_out.stdout"
+
+- name: "Setup admin user ({{ admin_name }})"
+  ansible.builtin.command: "pveum user add {{ admin_name }}@pve -password {{ admin_pw }} -email {{ admin_email }} -firstname {{ admin_first }} -lastname {{ admin_last }}" # noqa yaml[line-length]
+  changed_when: true
+  when: "admin_name not in users_out.stdout"
+
+- name: Get current ACLs
+  ansible.builtin.command: pveum acl list
+  changed_when: false
+  register: acl_out
+
+- name: Add Teraform user to role
+  ansible.builtin.command: pveum aclmod / -user terraform-prov@pve -role TerraformProv
+  changed_when: true
+  when: "'terraform-prov' not in acl_out.stdout"
+
+- name: "Add user to admin role ({{ admin_name }})"
+  ansible.builtin.command: "pveum aclmod / -user {{ admin_name }}@pve -role Administrator"
+  changed_when: true
+  when: "admin_name not in acl_out.stdout"

@@ -1,0 +1,20 @@
+---
+- name: Disable IPv6
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: 1
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/disable-ipv6.conf
+  loop:
+    - net.ipv6.conf.all.disable_ipv6
+    - net.ipv6.conf.default.disable_ipv6
+
+- name: Get network interfaces
+  ansible.builtin.command: ip a
+  changed_when: network_addresses.rc != 0
+  register: network_addresses
+
+- name: Verify Disabled
+  ansible.builtin.assert:
+    that:
+      - "'inet6' not in network_addresses.stdout"

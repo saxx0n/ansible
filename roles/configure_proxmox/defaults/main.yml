@@ -1,0 +1,27 @@
+---
+### Control variables
+# Disable IPv6
+disable_ipv6: true
+
+# Setup PCI passthru for GPU
+enable_passthru: true
+
+### Task specific variables
+## Postfix
+relayhost: <postfix server>
+
+## Storage
+nfs_server: <nfs server>
+iso_path: <share path>
+
+# In my env, data-pool is a pair of 10TB mirrored drives
+dpool_size: 9.10 TB
+dpool_type: mirror
+
+## Users
+admin_name: "{{ lookup('hashi_vault', 'secret=kv-v1/users/proxmox-admin:username') }}"
+admin_pw: "{{ lookup('hashi_vault', 'secret=kv-v1/users/proxmox-admin:pass_hash') }}"
+admin_email: "{{ lookup('hashi_vault', 'secret=kv-v1/users/proxmox-admin:email') }}"
+admin_first: "{{ lookup('hashi_vault', 'secret=kv-v1/users/proxmox-admin:first') }}"
+admin_last: "{{ lookup('hashi_vault', 'secret=kv-v1/users/proxmox-admin:last') }}"
+terraform_pw: "{{ lookup('hashi_vault', 'secret=kv-v1/users/terraform:proxmox_hash') }}"

@@ -1,0 +1,13 @@
+---
+- name: Install QoL packages
+  ansible.builtin.apt:
+    name:
+      - vim
+
+- name: Add Postfix Relayhost
+  ansible.builtin.lineinfile:
+    path: /etc/postfix/main.cf
+    regex: 'relayhost ='
+    line: "relayhost = [{{ relayhost }}]"
+  notify:
+    - Restart Postfix

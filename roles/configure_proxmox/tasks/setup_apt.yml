@@ -1,0 +1,50 @@
+---
+- name: Gather limited info
+  ansible.builtin.setup:
+    gather_subset:
+      - distribution_release
+      - processor
+
+- name: Add Firmware Repo
+  ansible.builtin.apt_repository:
+    repo: "deb https://deb.debian.org/debian {{ ansible_distribution_release }} main non-free-firmware"
+    filename: firmware
+    update_cache: true
+
+- name: Disable Enterprise Repos
+  ansible.builtin.apt_repository:
+    repo: "{{ item }}"
+    state: absent
+    update_cache: true
+  loop:
+    - deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
+    - deb https://enterprise.proxmox.com/debian/ceph-quincy bookworm enterprise
+
+- name: Enable Free Repos
+  ansible.builtin.apt_repository:
+    repo: "deb http://download.proxmox.com/debian/pve {{ ansible_distribution_release }} pve-no-subscription"
+    filename: proxmox-free
+    update_cache: true
+
+- name: Install All Updates
+  ansible.builtin.apt:
+    name:
+      - '*'
+  notify: Reboot Proxmox
+
+- name: Install AMD microcode
+  ansible.builtin.apt:
+    name:
+      - amd64-microcode
+  when: ansible_processor | lower is search("amd")
+  notify: Reboot Proxmox
+
+- name: Install Intel microcode
+  ansible.builtin.apt:
+    name:
+      - intel-microcode
+  when: ansible_processor | lower is search("intel")
+  notify: Reboot Proxmox
+
+- name: Trigger all the pending notifies
+  ansible.builtin.meta: flush_handlers

@@ -1,0 +1,62 @@
+---
+- name: Get current storages
+  ansible.builtin.command: pvesm status
+  changed_when: false
+  register: pvesm_out
+
+- name: Setup ISOs volume
+  ansible.builtin.command: "pvesm add nfs ISOs -content iso -export {{ iso_path }} -server {{ nfs_server }}"
+  changed_when: true
+  when: "'ISOs' not in pvesm_out.stdout"
+
+- name: Get list of zPools
+  ansible.builtin.command: zpool list
+  changed_when: false
+  register: zpool_out
+
+- name: Setup dPool
+  when: "'dpool' not in zpool_out.stdout"
+  block:
+    - name: Install parted
+      ansible.builtin.apt:
+        name: parted
+
+    - name: Get hardware devices
+      ansible.builtin.setup:
+        gather_subset:
+          - devices
+
+    - name: Get Storage Devices
+      ansible.builtin.set_fact:
+        dpool_devs: "{{ dpool_devs | default([]) + [item.key] }}"
+      when:
+        - not item.value.holders
+        - item.key is search ("sd")
+        - item.value.size == dpool_size
+      with_dict: "{{ ansible_devices }}"
+      loop_control:
+        label: "{{ item.key }} / {{ item.value.size }}"
+
+    - name: Wipe existing disks
+      ansible.builtin.command: "wipefs -f -a /dev/{{ item }}"
+      changed_when: true
+      loop: "{{ dpool_devs }}"
+
+    - name: Add Partition
+      community.general.parted:
+        device: "/dev/{{ item }}"
+        number: 1
+        part_end: 100%
+        label: gpt
+        name: dpool
+        fs_type: zfs
+        state: present
+      loop: "{{ dpool_devs }}"
+
+    - name: Create dpool
+      ansible.builtin.command: "zpool create -f -o ashift=12 dpool {{ dpool_type }} {{ dpool_devs[0] }} {{ dpool_devs[1] }}"
+      changed_when: true
+
+    - name: Register dpool with Proxmox
+      ansible.builtin.command: "pvesm add zfspool bulk -pool dpool -blocksize=8k -sparse"
+      changed_when: true

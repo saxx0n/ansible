@@ -1,0 +1,8 @@
+---
+- name: Fix Proxmox defaults
+  hosts: proxmox-hosts
+  gather_facts: false
+  become: true
+
+  roles:
+    - configure_proxmox

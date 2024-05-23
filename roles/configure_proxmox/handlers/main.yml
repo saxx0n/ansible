@@ -1,0 +1,18 @@
+- name: Restart Postfix
+  ansible.builtin.systemd:
+    name: postfix
+    state: restarted
+
+- name: Reboot Proxmox
+  ansible.builtin.reboot:
+    reboot_timeout: 3600
+
+- name: Refresh EDI
+  ansible.builtin.command: pve-efiboot-tool refresh
+  register: edi_output
+  changed_when: edi_output.rc == 0
+
+- name: Update InitramFS
+  ansible.builtin.command: update-initramfs -u -k all
+  register: initramfs_output
+  changed_when: initramfs_output.rc == 0

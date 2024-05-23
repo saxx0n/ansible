@@ -1,0 +1,26 @@
+---
+- name: Setup DNS
+  ansible.builtin.include_role:
+    name: configure_base
+    tasks_from: manage_resolv.yml
+
+- name: Manage APT
+  ansible.builtin.include_tasks: setup_apt.yml
+
+# Current this is ONLY for nVidia GPUs
+- name: Setup PCI passthru
+  ansible.builtin.include_tasks: setup_passthru.yml
+  when: enable_passthru | bool
+
+- name: Disable IPv6
+  ansible.builtin.include_tasks: disable_ipv6.yml
+  when: disable_ipv6 | bool
+
+- name: Setup Storage
+  ansible.builtin.include_tasks: setup_storage.yml
+
+- name: Misc Tweaks
+  ansible.builtin.include_tasks: setup_misc.yml
+
+- name: Setup Users
+  ansible.builtin.include_tasks: setup_users.yml
