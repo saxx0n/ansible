@@ -1,0 +1,12 @@
+---
+- name: Run some simple communication test
+  hosts: all
+  gather_facts: true
+
+  tasks:
+    - name: Test system is up and authentication works
+      ansible.builtin.ping:
+
+    - name: Dump a variable for no good reasons
+      ansible.builtin.debug:
+        var: ansible_virtualization_type

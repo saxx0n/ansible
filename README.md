@@ -3,6 +3,8 @@ Ansible playbooks for homelab-use
 !! All playbook have been generalized, so updating the defaults/main.yml will be required for proper function</h1>
 
 Playbooks:
+- communication_test.yml
+  - Exactly what it says on the tin.  Tests that ansible can communicate with a server
 - configure_aap.yml
    - This playbook runs against localhost and configures an Ansible Automation Platform (AAP) server.
    - Fully idempotent.
@@ -12,6 +14,9 @@ Playbooks:
 - configure_proxmox.yml
    - This playbook should be run against a proxmox server (was tested against 8.1).  
    - Fully idempotent.
+- patch_os.yml
+  - This playbook will patch a Debian/RHEL system and reboot as needed
+  - Fully idempotent
   
 Roles:
 - configure_aap
@@ -28,3 +33,5 @@ Roles:
 - configure_users
   - This role will read user data from a hashi-vault database and configure the target system with it.  Along with this it removes non-wanted accounts and handles root password/key
   - Requires a hashi-vault server
+- patch_os
+  - This role will patch a server to the latest OS and reboot as needed.  On rPI will cleanup old firmware files

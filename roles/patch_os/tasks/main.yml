@@ -1,0 +1,10 @@
+---
+- name: Patch Debian
+  ansible.builtin.include_tasks: debian.yml
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: Patch RedHat
+  ansible.builtin.include_tasks: redhat.yml
+  when:
+    - ansible_os_family == "RedHat"

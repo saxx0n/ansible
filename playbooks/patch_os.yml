@@ -1,0 +1,8 @@
+---
+- name: Patch and reboot servers
+  hosts: all,!localhost
+  become: true
+  gather_facts: true
+
+  roles:
+    - patch_os
