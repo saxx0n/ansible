@@ -1,0 +1,11 @@
+# Repository to pull an EE from
+ee_repo: repo.example.com
+
+# Domain not to proxy
+internal_domain: .example.com
+
+# Subnet not to proxy
+internal_network: 192.168.0.0/24
+
+# Internal URL to AAP
+tower_url: https://aap.example.com

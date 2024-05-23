@@ -1,0 +1,13 @@
+---
+- name: Create organizations
+  ansible.controller.organization:
+    name: "{{ item.name }}"
+    state: present
+    default_environment: "{{ item.ee }}"
+    galaxy_credentials:
+      - Ansible Galaxy
+  loop:
+    - name: Example
+      ee: example.com EE
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,0 +1,13 @@
+---
+- name: Create users
+  ansible.controller.user:
+    username: "{{ item.name }}"
+    password: "{{ lookup('hashi_vault', 'secret=kv-v1/users/{{ item.name }}:password') }}"
+    email: "{{ lookup('hashi_vault', 'secret=kv-v1/users/{{ item.name }}:email') }}"
+    superuser: "{{ item.super | default('false') }}"
+    state: present
+  loop:
+    - name: saxx0n
+      super: true
+    - name: gitlab
+    - name: checkmk

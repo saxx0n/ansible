@@ -1,0 +1,24 @@
+---
+- name: Set extra environment variables
+  ansible.controller.settings:
+    name: AWX_TASK_ENV
+    value:
+      ANSIBLE_SSH_ARGS: -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+      interpreter_python: auto_silent
+      NO_PROXY: "{{ internal_network }},{{ internal_domain }},127.0.0.1,localhost"
+
+- name: Fix bad baseurl
+  ansible.controller.settings:
+    name: TOWER_URL_BASE
+    value: "{{ tower_url }}"
+
+# This file is NOT in this repo
+- name: Set Custom Icon
+  ansible.controller.settings:
+    name: CUSTOM_LOGO
+    value: "data:image/png;base64,{{ lookup('file', 'icon.png') | b64encode }}"
+
+- name: Set Custom Web Socket Rate
+  ansible.controller.settings:
+    name: MAX_WEBSOCKET_EVENT_RATE
+    value: "0"

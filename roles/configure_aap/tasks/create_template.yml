@@ -1,0 +1,68 @@
+---
+- name: Create Configure AAP Template
+  ansible.controller.job_template:
+    allow_simultaneous: false
+    ask_variables_on_launch: false
+    become_enabled: false
+    credentials:
+      - Ansible User (Vault)
+      - Hashi-Vault (Playbook)
+      - Tower User
+    inventory: x64
+    job_type: run
+    name: Configure AAP
+    notification_templates_error: eMail Notification
+    playbook: playbooks/configure_aap.yml
+    project: src-playbooks
+
+- name: Create Templates
+  ansible.controller.job_template:
+    allow_simultaneous: "{{ template.simul | default(true) }}"
+    ask_credential_on_launch: "{{ template.ask_creds | default(false) }}"
+    ask_inventory_on_launch: "{{ template.ask_inv | default(false) }}"
+    ask_limit_on_launch: "{{ template.ask_limit | default(true) }}"
+    ask_variables_on_launch: "{{ template.ask_vars | default(false) }}"
+    become_enabled: "{{ template.become | default(true) }}"
+    credentials: "{{ template.creds | default('Ansible User (Vault)') }}"
+    execution_environment: "{{ template.ee | default('Example.com EE') }}"
+    extra_vars: "{{ template.vars | default(dict()) }}"
+    inventory: "{{ template.inv | default('x64') }}"
+    job_type: run
+    limit: "{{ template.limit | default('') }}"
+    name: "{{ template.name }}"
+    notification_templates_error: "{{ template.notification | default(omit) }}"
+    playbook: "playbooks/{{ template.playbook | default('') }}"
+    project: "{{ template.project | default('src-playbooks') }}"
+    scm_branch: "{{ template.branch | default('master') }}"
+    state: "{{ template.state | default('present') }}"
+  with_items:
+    - name: Configure BaseOS
+      creds:
+        - Ansible User (Vault)
+        - Hashi-Vault (Playbook)
+      playbook: configure_base.yml
+      notification: eMail Notification
+
+    - name: Configure Users
+      ask_creds: true
+      creds:
+        - Root User (Vault)
+        - Hashi-Vault (Playbook)
+      playbook: configure_users.yml
+
+    - name: Run Communication Test
+      ee: Example.com Test EE
+      playbook: communication_test.yml
+
+    - name: Run OS Patch
+      playbook: patch_os.yml
+      notification: eMail Notification
+      limit: "!tower_servers"
+
+    - name: Setup ProxMox
+      playbook: setup_proxmox.yml
+      limit: proxmox_servers
+
+  loop_control:
+    loop_var: template
+    label: "{{ template.name }}"

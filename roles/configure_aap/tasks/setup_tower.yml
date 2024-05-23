@@ -1,0 +1,30 @@
+---
+- name: Create System Level Options
+  ansible.builtin.include_tasks: create_system.yml
+
+- name: Create EEs
+  ansible.builtin.include_tasks: create_ee.yml
+
+- name: Create Organizations
+  ansible.builtin.include_tasks: create_organization.yml
+
+- name: Create Users
+  ansible.builtin.include_tasks: create_user.yml
+
+- name: Create Credentials
+  ansible.builtin.include_tasks: create_cred.yml
+
+- name: Create Notifications
+  ansible.builtin.include_tasks: create_notification.yml
+
+- name: Create Projects
+  ansible.builtin.include_tasks: create_project.yml
+
+- name: Create Inventories
+  ansible.builtin.include_tasks: create_inventory.yml
+
+- name: Create Templates
+  ansible.builtin.include_tasks: create_template.yml
+
+- name: Create Schedules
+  ansible.builtin.include_tasks: create_schedule.yml

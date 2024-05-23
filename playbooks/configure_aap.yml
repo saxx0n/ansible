@@ -1,0 +1,9 @@
+---
+- name: Configure AAP
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Configure AAP
+      ansible.builtin.include_role:
+        name: configure_aap

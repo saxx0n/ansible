@@ -1,0 +1,14 @@
+---
+- name: Add EE to the controller instance
+  ansible.controller.execution_environment:
+    name: Example.com EE
+    image: registry.example.com/docker/aap-ee:latest
+    credential: GitLab Registry (Vault)
+    pull: always
+
+- name: Add Test EE to the controller instance
+  ansible.controller.execution_environment:
+    name: Example.com Test EE
+    image: registry.example.com/docker/aap-ee:testing
+    credential: GitLab Registry (Vault)
+    pull: always

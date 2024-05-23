@@ -3,6 +3,9 @@ Ansible playbooks for homelab-use
 !! All playbook have been generalized, so updating the defaults/main.yml will be required for proper function</h1>
 
 Playbooks:
+- configure_aap.yml
+   - This playbook runs against localhost and configures an Ansible Automation Platform (AAP) server.
+   - Fully idempotent.
 - configure_base.yml  
    - This playbook should be run against any server, and it will pull it into compliance/a known good state.  
    - Fully idempotent.
@@ -11,6 +14,10 @@ Playbooks:
    - Fully idempotent.
   
 Roles:
+- configure_aap
+  - This role will configure pretty much all needed settings for an AAP server, but I had to do a LOT of damage to it to generalize it so a full review before it runs will be necessary.  It ::should:: work, but I cant really test it...
+  - Requires a hashi-vault server
+  - If all "ansible.controller" tasks are replaced with "awx.awx" (same syntax) tasks, it should work against an AWX (upstream AAP, IE Free) server without incident
 - configure_base
   - This role provides a base level of configuration.
 - configure_firewall

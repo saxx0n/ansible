@@ -1,0 +1,43 @@
+---
+- name: Build a reconfiguration schedule
+  ansible.controller.schedule:
+    name: Update Tower Config
+    rrule: "DTSTART;TZID=US/Central:20191219T010500 RRULE:INTERVAL=1;FREQ=DAILY"
+    state: present
+    unified_job_template: Configure AAP
+
+- name: Build a Patch schedule
+  ansible.controller.schedule:
+    inventory: "{{ sched.inv }}"
+    limit: "{{ sched.limit | default('') }}"
+    name: Patch ({{ sched.inv }})
+    rrule: "DTSTART;TZID=US/Central:20191219T{{ sched.rtime }} RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=SA"
+    state: present
+    unified_job_template: Run OS Patch
+  with_items:
+    - inv: 'Raspberry Pi'
+      rtime: '000000'
+    - inv: x64
+      rtime: "060000"
+      limit: "!proxmox_servers,!tower_servers"
+  loop_control:
+    loop_var: sched
+    label: "{{ sched.inv }}"
+
+- name: Build a BaseOS schedule
+  ansible.controller.schedule:
+    inventory: "{{ sched.inv }}"
+    limit: "{{ sched.limit | default('') }}"
+    name: "Reconfigure BaseOS ({{ sched.inv }})"
+    rrule: "DTSTART;TZID=US/Central:20191219T{{ sched.rtime }} RRULE:INTERVAL=1;FREQ=DAILY"
+    state: present
+    unified_job_template: Configure BaseOS
+  with_items:
+    - inv: 'Raspberry Pi'
+      rtime: '030000'
+    - inv: x64
+      rtime: "040000"
+      limit: "!proxmox_servers"
+  loop_control:
+    loop_var: sched
+    label: "{{ sched.inv }}"

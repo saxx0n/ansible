@@ -1,0 +1,107 @@
+---
+- name: Create GitLab Registry Creds
+  ansible.controller.credential:
+    name: GitLab Registry (Vault)
+    organization: Example
+    state: present
+    credential_type: Container Registry
+    inputs:
+      host: "{{ ee_repo }}"
+      username: awx_tower
+
+- name: Link Registry Cred to Vault
+  ansible.controller.credential_input_source:
+    input_field_name: password
+    source_credential: Hashi-Vault
+    target_credential: GitLab Registry (Vault)
+    metadata:
+      secret_path: "kv-v1/apps/gitlab"
+      secret_key: "registry"
+
+- name: Create GitLab Creds
+  ansible.controller.credential:
+    name: GitLab (Vault)
+    organization: Example
+    state: present
+    credential_type: Source Control
+    inputs:
+      username: gitlab
+
+- name: Link GitLab User to Vault
+  ansible.controller.credential_input_source:
+    input_field_name: password
+    source_credential: Hashi-Vault
+    target_credential: GitLab (Vault)
+    metadata:
+      secret_path: "kv-v1/apps/gitlab"
+      secret_key: "aap"
+
+- name: Create Ansible Machine Key
+  ansible.controller.credential:
+    name: Ansible User (Vault)
+    organization: Example
+    state: present
+    credential_type: Machine
+    inputs:
+      username: ansible-control
+
+- name: Create Temporary Cloud User Machine Key
+  ansible.controller.credential:
+    name: Cloud User (Vault)
+    organization: Example
+    state: present
+    credential_type: Machine
+    inputs:
+      username: cloud-user
+
+- name: Create Temporary Root Machine Key
+  ansible.controller.credential:
+    name: Root User (Vault)
+    organization: Example
+    state: present
+    credential_type: Machine
+    inputs:
+      username: root
+
+- name: Link Ansible User to Vault (SSH Key)
+  ansible.controller.credential_input_source:
+    input_field_name: ssh_key_data
+    source_credential: Hashi-Vault
+    target_credential: Ansible User (Vault)
+    metadata:
+      secret_path: "/kv-v1/users/ansible-control"
+      secret_key: "ssh_pri_key"
+
+- name: Link Cloud User to Vault (SSH Key)
+  ansible.controller.credential_input_source:
+    input_field_name: ssh_key_data
+    source_credential: Hashi-Vault
+    target_credential: Cloud User (Vault)
+    metadata:
+      secret_path: "/kv-v1/users/cloud-user"
+      secret_key: "ssh_pri_key"
+
+- name: Link Root User to Vault (SSH Key)
+  ansible.controller.credential_input_source:
+    input_field_name: ssh_key_data
+    source_credential: Hashi-Vault
+    target_credential: Root User (Vault)
+    metadata:
+      secret_path: "/kv-v1/users/root"
+      secret_key: "ssh_pri_key"
+
+- name: Link Ansible User to Vault (Password)
+  ansible.controller.credential_input_source:
+    input_field_name: become_password
+    source_credential: Hashi-Vault
+    target_credential: Ansible User (Vault)
+    metadata:
+      secret_path: "/kv-v1/users/ansible-control"
+      secret_key: "password"
+
+- name: Create Hashi-Vault Injection Cred Type
+  ansible.controller.credential_type:
+    name: Vault Injection
+    kind: cloud
+    inputs: "{{ lookup('file', 'input.json') }}"
+    injectors: "{{ lookup('file', 'injector.json') }}"

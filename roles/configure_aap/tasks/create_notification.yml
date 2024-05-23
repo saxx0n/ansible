@@ -1,0 +1,17 @@
+---
+- name: Create email notification
+  ansible.controller.notification_template:
+    name: eMail Notification
+    notification_type: email
+    notification_configuration:
+      username: ''
+      password: ''
+      sender: tower@example.com
+      recipients:
+        - user@example.com
+      host: mailserver.example.com
+      port: 25
+      use_tls: false
+      use_ssl: false
+    organization: Example
+    state: present
