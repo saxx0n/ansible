@@ -8,12 +8,12 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
 - All tasks need a name.  This makes output far more useful, and easier to search/parse.
   
   Bad Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.set_fact:
       foo: bar
   ```
   Good Code:
-  ```ansible
+  ```yaml
   - name: Set needed variable
     ansible.builtin.set_fact:
       foo: bar
@@ -21,22 +21,22 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
 - All tasks need to use FQDN for modules.  This ensure that the correct module is always used.
 
   Bad Code:
-  ```ansible
+  ```yaml
   - command: foo
   ```
   Good Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.command: foo
   ```
 
 - Whenever possible, use a native ansible module.  This provides a more flexable way of doing things, and OS changes are unlikely to change things
 
   Bad Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.command: apt-get update
   ```
   Good Code:
-  ```ansible
+  ```yaml
   - ansible.builtit.apt:
       update_cache: true
   ```
@@ -44,12 +44,12 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
 - If errors are ignored, add a comment explaining why.  This just prevents bad practices, and adds to future code maintance
 
   Bad Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.command: foo
     ignore_errors: true
   ```
   Good Code:
-  ```ansible
+  ```yaml
   # This command will fail, but in a silent and non-breaking way
   - ansible.builtin.command: foo
     ignore_errors: true
@@ -57,12 +57,12 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
 - When setting bool values, always use true/false.  This ensures consistency, especially when others are using/modifying your code
 
   Bad Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.set_fact:
       foo: yes
   ```
   Good Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.set_fact:
       foo: true
   ```
@@ -70,7 +70,7 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
 - Use propper spacing for jinja2.  This ensures consistency, especially when others are using/modifying your code
 
   Bad Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.set_fact:
       foo: "{{ bar [-1] }}"
 
@@ -78,7 +78,7 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
       foo: "{{bar[-1]}}"
   ```
   Good Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.set_fact:
       foo: "{{ bar[-1] }}"
   ```
@@ -86,12 +86,12 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
 - Add a blank line between multiple tasks.  This ensures consistency, and makes it far easier to read.
 
   Bad Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.command: foo
   - ansible.builtin.command: bar
   ```
   Good Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.command: foo
 
   - ansible.builtin.command: bar
@@ -100,7 +100,7 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
 - When using a block, put when before the tasks.  This makes block logic easier to read.
 
   Bad Code:
-  ```ansible
+  ```yaml
   - block:
       - ansible.builtin.command: foo
 
@@ -108,7 +108,7 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
     when: foo == bar
   ```
   Good Code:
-  ```ansible
+  ```yaml
   - block:
     when: foo == bar
       - ansible.builtin.command: foo
@@ -119,7 +119,7 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
 - When using blocks, group common whens.  This ensures consitency and reduces redundancy.
 
   Bad Code:
-  ```ansible
+  ```yaml
   - block:
       - ansible.builtin.command: foo
         when: foo == bar
@@ -128,7 +128,7 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
         when: foo == bar
   ```
   Good Code:
-  ```ansible
+  ```yaml
   - block:
     when: foo == bar
       - ansible.builtin.command: foo
@@ -140,22 +140,22 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
 - Unless needed, use command instead of shell.  Shell is slower, and can cause expected results.
 
   Bad Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.shell: echo foo
   ```
   Good Code:
-  ```ansible
+  ```yaml
   - ansible.builti.command: echo foo
   ```
   
 - When using command/shell, include a changed_when line.  Not all commands output in a logical form when they fail.
 
   Bad Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.command: foo
   ```
   Good Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.command: foo
     register: foo_out
     changed_when: "'bar' not in foo_out.stdout"
@@ -168,24 +168,24 @@ Additionally, all code should be run thru ansible-lint and have it pass (example
 - When using pipes, use pipefail whenever possible.  Not using this can cause some very unexpected and unwanted failures.
 
   Bad Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.shell: false | cat
   ```
 
    Good Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.shell: set -o pipefail && false | cat
   ```
 
 - When using command/shell, dont force a good as opposed to handling errors.
 
   Bad Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.command: foo ; echo 0
   ```
 
   Good Code:
-  ```ansible
+  ```yaml
   - ansible.builtin.command: foo
     register: foo_out
     failed_when: ( foo_out.rc not in [ 0, 1 ])
